@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd">
+
+    <!--自动扫描-->
+    <context:component-scan base-package="com.neverend"/>
+
+
+    <!--ActiveMQConnectionFactory-->
+    <bean id="activeMQConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="tcp://localhost:61616"/>
+        <!--配置重试参数对象-->
+        <property name="redeliveryPolicy" ref="redeliveryPolicy"/>
+    </bean>
+
+    <!--配置重试参数-->
+    <bean id="redeliveryPolicy" class="org.apache.activemq.RedeliveryPolicy">
+        <!--重试次数-->
+        <property name="maximumRedeliveries" value="3"/>
+        <!--初次重试延迟时间-->
+        <property name="initialRedeliveryDelay" value="3000"/>
+        <!--每次重试延迟时间-->
+        <property name="redeliveryDelay" value="3000"/>
+    </bean>
+
+    <!--spring Active连接工厂-->
+    <bean id="connectionFactory" class="org.springframework.jms.connection.SingleConnectionFactory">
+        <property name="targetConnectionFactory" ref="activeMQConnectionFactory"/>
+    </bean>
+
+    <!--jmsTemplate-->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <!--配置连接工厂-->
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <!--配置签收模式为客户端签收 1 自动签收（默认） 2 客户端签收-->
+        <property name="sessionAcknowledgeMode" value="2"/>
+        <!-- 选配： 配置消息目的地,如果没有配置，则在消息发送时指定-->
+        <!--<property name="defaultDestinationName" value="spring-queue"/>-->
+    </bean>
+
+    <!--配置Pub/sub监听器 方式 1-->
+    <!--<bean id="topic" class="org.apache.activemq.command.ActiveMQTopic">-->
+        <!--<constructor-arg name="name" value="PubSub-queue"/>-->
+    <!--</bean>-->
+    <!--<bean class="org.springframework.jms.listener.DefaultMessageListenerContainer">-->
+        <!--<property name="connectionFactory" ref="connectionFactory"/>-->
+        <!--<property name="messageListener" ref="springListenerPubSub"/>-->
+        <!--<property name="destination" ref="topic"/>-->
+    <!--</bean>-->
+
+
+    <!--配置Pub/sub监听器 方式 2-->
+    <!--<jms:listener-container destination-type="topic"-->
+                            <!--connection-factory="connectionFactory">-->
+        <!--<jms:listener destination="PubSub-queue" ref="springListenerPubSub"/>-->
+    <!--</jms:listener-container>-->
+
+
+    <!--监听Queue消息 基于注解-->
+    <bean id="jmsListenerContainerFactory" class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+            <property name="connectionFactory" ref="connectionFactory"/>
+        <!--消息签收模式默认是1,2是客户端签收-->
+        <!--<property name="sessionAcknowledgeMode" value="2"/>-->
+    </bean>
+
+    <bean id="jmsTopicListenerContainerFactory" class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <!--监听pub/sub-->
+        <property name="pubSubDomain" value="true"/>
+    </bean>
+
+    <jms:annotation-driven/>
+</beans>

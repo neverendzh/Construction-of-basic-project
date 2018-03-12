@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--将数据库中下划线风格的命名映射为Java中驼峰命名风格-->
+    <settings>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+    </settings>
+    <!--别名-->
+    <typeAliases>
+        <!--配置类的别名-->
+        <!--<typeAlias type="com.neverend.entity.Tag" alias="Tag"/>-->
+
+        <!--扫描次包下所有的javaBean并且为每一个javaBean注册一个以小写字母开头的类名-->
+        <package name="com.neverend.entity"/>
+    </typeAliases>
+
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageInterceptor"></plugin>
+    </plugins>
+    <!--environments 数据库连接环境-->
+    <environments default="development">
+        <environment id="development">
+            <!--type="JDBC" 使用事务JDBC事务管理器-->
+            <transactionManager type="JDBC"></transactionManager>
+            <!--type="POOLED" 创建数据库连接池-->
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql:///mydb"/>
+                <property name="username" value="root"/>
+                <property name="password" value="123456"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+        <mapper resource="mapper/KaoLaMapper.xml"/>
+    </mappers>
+</configuration>

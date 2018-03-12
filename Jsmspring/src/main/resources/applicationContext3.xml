@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd">
+
+    <!--自动扫描-->
+    <context:component-scan base-package="com.neverend"/>
+
+    <!--ActiveMQConnectionFactory-->
+    <bean id="activeMQConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="tcp://localhost:61616"/>
+    </bean>
+
+    <!--spring Active连接工厂-->
+    <bean id="connectionFactory" class="org.springframework.jms.connection.SingleConnectionFactory">
+        <property name="targetConnectionFactory" ref="activeMQConnectionFactory"/>
+    </bean>
+
+    <!--jmsTemplate-->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <!--配置连接工厂-->
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <!-- 选配： 配置消息目的地,如果没有配置，则在消息发送时指定-->
+        <property name="defaultDestinationName" value="spring-queue"/>
+    </bean>
+
+
+    <!--在Spring中配置监听器。配置监听器后，当MQ队列中有消息就会自动触发监听器的运行-->
+    <bean id="weiXinListener2" class="com.neverend.listener.WeiXinListener"/>
+    <bean id="qqListener2" class="com.neverend.listener.QqListener"/>
+
+
+    <!--Topic主题对象-->
+    <bean id="destination" class="org.apache.activemq.command.ActiveMQTopic">
+        <constructor-arg name="name" value="Spring-Topic"/>
+    </bean>
+
+    <!--<jms:listener-container destination-type="topic" connection-factory="connectionFactory"-->
+                            <!--concurrency="3-10" acknowledge="client">-->
+        <!--<jms:listener destination="spring-Topic" ref="destination"/>-->
+    <!--</jms:listener-container>-->
+
+
+
+    <!--配置监听容器-->
+    <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <!--<property name="destinationName" value="spring-queue"/>-->
+        <property name="destination" ref="destination"/>
+        <property name="messageListener" ref="weiXinListener"/>
+    </bean>
+    <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <!--<property name="destinationName" value="spring-queue"/>-->
+        <property name="destination" ref="destination"/>
+        <property name="messageListener" ref="qqListener"/>
+    </bean>
+
+
+    <!--配置Queue监听器 方式 2-->
+    <!--<jms:listener-container connection-factory="connectionFactory"
+                            acknowledge="client">
+        <jms:listener destination="message-queue" ref="myQueueListener" concurrency="3-10"/>
+    </jms:listener-container>-->
+
+</beans>

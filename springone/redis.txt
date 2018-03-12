@@ -1,0 +1,12 @@
+config get requirepass 查看密码
+auth nimabide1314520$ 验证密码
+config set requirepass nimabide1314520$ 设置密码
+/etc/init.d/redis_6379 start 启动
+/etc/init.d/redis_6379 stop  停止
+vim /etc/redis/6379.conf 配置文件
+
+redis-cli -a nimabide1314520$ 登录redis客户端
+ps -aux | grep redis 查看端口号
+
+
+ mkdir redis 创建文件夹

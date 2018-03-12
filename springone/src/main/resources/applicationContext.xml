@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--将Bean放入Spring容器-->
+    <!--scope="prototype" 关闭默认的单例类，每次创建键都产生一个新的对象-->
+    <!--lazy-init="true" 在Spring容器创建时不创建是咧类的对象， 默认在容器启动时创建类的实例化对象-->
+    <bean id="kaoLa" class="com.neverend.entity.KaoLa"/>
+    <alias name="kaoLa" alias="kaoLa2"/>
+
+    <bean id="kaoLaService" class="com.neverend.service.impl.KaoLaServiceImpl">
+        <!--Set注入-->
+        <property name="kaoLa" ref="kaoLa2"/>
+    </bean>
+
+    <!--构造方法注入 • 放入Spring容器的Bean都应该有一个无参数的构造方法-->
+   <!-- <bean id="kaoLaServiceMethod"class="com.neverend.service.impl.KaoLaServiceImpl">
+        <constructor-arg name="kaoLa" ref="kaoLa"/>
+    </bean>-->
+
+    <bean id="aopAdvice" class="com.neverend.aop.AopAdvice"/>
+    <aop:config>
+        <aop:aspect ref="aopAdvice">
+            <!--指定目标对象范围，切入点表达式-->
+            <aop:pointcut id="kaola" expression="execution(* com.neverend.entity..*.*(..))"/>
+            <!--前置通知-->
+            <aop:before method="beforeAdvice" pointcut-ref="kaola"/>
+            <aop:after-returning method="afterAdvice" pointcut-ref="kaola"/>
+            <aop:after-throwing method="exceptionAdvice" pointcut-ref="kaola" throwing="ex"/>
+            <aop:after method="finallyAdvice" pointcut-ref="kaola"/>
+            <aop:around method="aroundAdvice" pointcut-ref="kaola"/>
+        </aop:aspect>
+
+    </aop:config>
+</beans>
