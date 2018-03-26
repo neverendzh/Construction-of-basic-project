@@ -13,6 +13,7 @@
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
     <script src="/static/js/ajaxfileupload.js"></script>
+    <%--<script src="/static/js/json2.js"></script>--%>
 </head>
 <style>
     .text-file {
@@ -68,24 +69,26 @@
            url: '/movie/customer/level',
            dataType: 'json',
            success:function(data){
-               var item;
-               $.each(data,function(i,result){
-                   item=
-                       "<tr><td>"+result['id']+"</td><td>"+result['name']+"</td><td>"+result['password']+"</td><td>"+result['number']+"</td></tr>";
-                   $('.table').append(item);
-               });
+//               var movie =  JSON.parse(data);
+               $("table").empty();
+               var timr;
+               for (var i = 0;i<data.length;i++){
+                   timr = "<tr><th>"+data[i].id+"</th> <th>"+data[i].number+"</th><th>"+data[i].password+"</th><th>"+data[i].name+"</th></tr>"
+                   $("table").append(timr);
+                   console.log()
+               }
            },
        });
    } ;
 
-   WLFWQ.prototype.upLoadFile = function(){
-       $.ajaxFileUpload({
-           url: "/movie/save",  //用于文件上传的服务器端请求地址
-           secureuri: false,                                //一般设置为false
-           fileElementId: "upload",            //文件上传空间的id属性  <input type="file" id="file" name="file" />
-           dataType: "json",
-       });
-   }
+//   WLFWQ.prototype.upLoadFile = function(){
+//       $.ajaxFileUpload({
+//           url: "/movie/save",  //用于文件上传的服务器端请求地址
+//           secureuri: false,                                //一般设置为false
+//           fileElementId: "upload",            //文件上传空间的id属性  <input type="file" id="file" name="file" />
+//           dataType: "json",
+//       });
+//   }
 </script>
 
 
