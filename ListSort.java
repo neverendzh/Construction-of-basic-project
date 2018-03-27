@@ -1,14 +1,14 @@
 package com.kaishengit.util;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
+ * @author 小野
  * Created by Administrator on 2018/3/26.
  */
 public class ListSort {
@@ -36,28 +36,9 @@ public class ListSort {
         listSorts.add(listSorts9);
         listSorts.add(listSorts10);
         for (int i =0;i<listSorts.size();i++){
-
-            double [] doubles = new double[]{};
-            for (int j =0;j<listSorts.size();j++){
                 Score score = listSorts.get(i);
                 showAttr(score,"tt");
-            }
-
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
 
@@ -67,27 +48,21 @@ public class ListSort {
             return;
         }
         Field[] fields= o.getClass().getDeclaredFields();
-        System.out.println("————————————"+title+"————————————————");
+//        System.out.println("————————————"+title+"————————————————");
         double[] doubles = new double[fields.length];
         Map<Object,double[] > map = new HashMap<>();
         for(int i=0;i<fields.length;i++){
-            System.out.println(fields.length+"长度");
-
+//            System.out.println(fields.length+"长度");
             String fieldName=fields[i].getName().substring(0, 1).toUpperCase()+fields[i].getName().substring(1);
-
-
             try {
                 Method getMethod=o.getClass().getMethod("get"+fieldName, new Class[]{});
 //                System.out.println("<-"+"get"+fieldName+"->"+"t{"+getMethod.invoke(o, new Object[]{})+"}");
-
                 try {
-
                     double d = (double) getMethod.invoke(o, new Object[]{});
                     doubles[i] = d;
                 }catch (ClassCastException e){
                     e.getMessage();
                 }
-
             } catch (SecurityException e) {
                 e.printStackTrace();
             } catch (NoSuchMethodException e) {
@@ -111,11 +86,80 @@ public class ListSort {
                 }
             }
         }
-        for ( int i = doubles.length-1;i>=0;i--){
+         map.put(o,doubles);
+       bijiao(map);
 
-            System.out.println(doubles[i]);
         }
-//       System.out.println(doubles.length+"dubbo");
-//       map.put(o,);
-        }
+
+   public static void bijiao(Map<Object,double []> objectMap){
+       Map<Object,Double> map = new HashMap<>();
+       double socreAll = 0.0;
+       for (Map.Entry<Object,double []> entry : objectMap.entrySet()){
+           double [] doubles = entry.getValue();
+           Score score = (Score) entry.getKey();
+           int j = 0;
+           double[] doubles1 = new double[3];
+           for (int i =0;i<doubles.length;i++){
+               int d = doubles.length-3;
+               if ( i >= d ){
+                   doubles1[j] = doubles[d];
+                   j++;
+               }
+           }
+           for (int i1 = 0;i1<doubles1.length-1;i1++){
+               socreAll = socreAll+ doubles1[i1];
+           }
+           map.put(score,socreAll);
+       }
+
+       scoreList(map);
+   }
+
+    /**
+     * 返回排序后集合
+     * @param scoreDoubleMap
+     * @return
+     */
+   public static List<Score> scoreList(Map<Object,Double> scoreDoubleMap){
+       Map<Integer,Score> scoreMap = new HashMap<>();
+       Map<Integer,Double> doubleMap = new HashMap<>();
+       List<Double> doubleList = new ArrayList<>();
+       for (Map.Entry<Object, Double> entry : scoreDoubleMap.entrySet()){
+          Score score = (Score) entry.getKey();
+          double d = entry.getValue();
+          scoreMap.put(1,score);
+          doubleMap.put(1,d);
+          doubleList.add(d);
+       }
+
+       double[] allScore = new double[]{doubleList.size()-1};
+       for (int i = 0;i<doubleList.size();i++){
+          allScore[i] = doubleList.get(i);
+       }
+       Arrays.sort(allScore);
+
+       int [] ints = new int[]{allScore.length-1};
+       int mapkey = 0;
+         for (Map.Entry<Integer,Double> doubleMaps : doubleMap.entrySet()){
+             for (double d : allScore){
+                 if (doubleMaps.getValue() == d){
+                     int keydoub  = doubleMaps.getKey();
+                     ints[mapkey] = keydoub;
+                     mapkey++;
+                 }
+             }
+         }
+       List<Score> scoreList = new ArrayList<>();
+       for (Map.Entry<Integer, Score> entry : scoreMap.entrySet()) {
+
+           for (int key : ints){
+               if (entry.getKey() == key ){
+                   scoreList.add(entry.getValue());
+               }
+
+           }
+       }
+
+       return scoreList;
+   }
 }
